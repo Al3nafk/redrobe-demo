@@ -75,7 +75,8 @@ h3{font-size:16px;margin:0;line-height:1.3}
 .switch button{min-height:44px;padding:0 18px;border-radius:99px;border:1px solid var(--line);background:var(--card);font-weight:700}
 .switch button.on{background:var(--ink);color:var(--app);border-color:var(--ink)}
 .staff{width:min(760px,100%);height:800px;background:var(--app);border:1px solid var(--line);border-radius:28px;box-shadow:0 30px 60px #2A1F2D26;display:flex;flex-direction:column;overflow:hidden}
-.shead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;background:var(--ink);color:var(--app)}
+.shead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;background:#2A1F2D;color:#FAF5F2}
+.stabs .sim{margin-left:auto;border-color:var(--sage);min-height:40px;padding:0 16px;border-radius:99px;background:var(--sage);color:#fff;font-weight:700;font-size:14px}
 .shead b{font:400 24px 'DM Serif Display',serif}
 .sbody{flex:1;overflow-y:auto;padding:16px 20px 20px}
 .stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}
@@ -172,7 +173,7 @@ home(){const r=mine().find(x=>x.stage<5);
  return `<div class="hero"><span>Wear more. Buy less.</span><b>Dinner this Friday?</b><span>Rent a look from RM25 for 4 days.</span>${garment('dress','#FAF5F2',110)}</div>
  ${r?`<button class="card row" data-go="track" data-id="${r.no}" style="width:100%;text-align:left"><span class="swatch" style="background:var(--rosebg);width:56px;aspect-ratio:1">${garment(it(r.id).kind,it(r.id).c,48)}</span><span class="grow"><h3>${it(r.id).name}</h3><span class="muted">${['Booked','Ready to collect','Wearing','Returned','Cleaned'][r.stage-1]} · ${r.date}</span></span><span class="price">›</span></button>`:''}
  <p class="muted" style="font-weight:700;margin:14px 2px 8px">Shop by occasion</p>
- <div class="grid">${['Dinner','Wedding','Interview','Graduation'].map(o=>`<button class="tile" data-occ="${o}"><span style="font-weight:700">${o}</span><span class="muted">${ITEMS.filter(i=>i.occ===o).length} looks</span></button>`).join('')}</div>
+ <div class="grid">${['Dinner','Wedding','Interview','Graduation'].map(o=>`<button class="tile" data-occ="${o}"><span style="font-weight:700">${o}</span><span class="muted">${(n=>n+(n===1?' look':' looks'))(ITEMS.filter(i=>i.occ===o).length)}</span></button>`).join('')}</div>
  <button class="btn alt" data-tab="member" style="margin-top:14px">ReDrobe Monthly · 2 outfits for RM69</button>`},
 browse(){const list=ITEMS.filter(i=>(S.occ==='All'||i.occ===S.occ)&&!S.oos[i.id]);
  return `<h2>Browse</h2><div class="pills" role="tablist">${OCC.map(o=>`<button class="${S.occ===o?'on':''}" data-occ="${o}">${o}</button>`).join('')}</div>
@@ -224,7 +225,7 @@ function renderStaff(){const R=S.rentals;const cnt=k=>R.filter(r=>r.stage===k).l
  const out=ITEMS.map(i=>({i,out:R.filter(r=>r.id===i.id&&r.stage>=2&&r.stage<=3).length,cleaning:R.filter(r=>r.id===i.id&&r.stage===4).length}));
  $('staff').innerHTML=`<div class="shead"><b>ReDrobe Studio · Staff</b><span class="chip" style="background:#ffffff22;color:#fff">Today: ${S.today}</span></div><div class="sbody">
  <div class="stats"><div class="stat"><b>${cnt(1)}</b><span>to prepare</span></div><div class="stat"><b>${cnt(2)}</b><span>ready to collect</span></div><div class="stat"><b>${cnt(3)}</b><span>out on rental</span></div><div class="stat"><b>${cnt(4)}</b><span>to inspect</span></div><div class="stat"><b>${R.filter(r=>r.late&&r.stage===3).length}</b><span>overdue</span></div></div>
- <div class="stabs" role="tablist">${[['queue','Order queue'],['inv','Inventory'],['sum','Today']].map(([k,l])=>`<button class="${S.stab===k?'on':''}" data-stab="${k}">${l}</button>`).join('')}</div>
+ <div class="stabs">${[['queue','Order queue'],['inv','Inventory'],['sum','Today']].map(([k,l])=>`<button class="${S.stab===k?'on':''}" data-stab="${k}">${l}</button>`).join('')}<button class="sim" data-sact="sim">+ Simulate order</button></div>
  ${S.stab==='queue'?`<div class="board">${STAGES.map((t,k)=>{const list=R.filter(r=>r.stage===k+1);return `<div class="col"><h4>${t} <small>${list.length}</small></h4>${list.map(ordCard).join('')||'<div class="empty">Nothing here</div>'}</div>`}).join('')}</div>`:''}
  ${S.stab==='inv'?`<table class="inv"><thead><tr><th>Item</th><th class="hide">Sizes</th><th class="n">Out</th><th class="n">Cleaning</th><th class="n hide">Rented</th><th>Status</th></tr></thead><tbody>${out.map(({i,out,cleaning})=>`<tr><td>${i.name}</td><td class="hide">${i.sizes.join(' ')}</td><td class="n">${out}</td><td class="n">${cleaning}</td><td class="n hide">${i.rented}×</td><td><button class="pill2 ${S.oos[i.id]?'off':'ok'}" data-sact="oos" data-id="${i.id}" aria-label="Toggle ${i.name} availability">${S.oos[i.id]?'In repair':'Available'}</button></td></tr>`).join('')}</tbody></table><p class="demo" style="text-align:left">Tap a status to move an item in or out of repair. Items in repair are hidden from customers.</p>`:''}
  ${S.stab==='sum'?`<div class="grid"><div class="card"><span class="muted">Pickups booked for today</span><h2 style="margin:4px 0 0">${today.length}</h2></div><div class="card"><span class="muted">Payments today (incl. deposits)</span><h2 style="margin:4px 0 0">${rm(rev)}</h2></div><div class="card"><span class="muted">Late fees to collect</span><h2 style="margin:4px 0 0">${rm(R.filter(r=>r.late).reduce((a,r)=>a+r.late*10,0))}</h2></div><div class="card"><span class="muted">Items in repair</span><h2 style="margin:4px 0 0">${Object.values(S.oos).filter(Boolean).length}</h2></div></div><p class="demo" style="text-align:left">Sample data for the demo.</p>`:''}
@@ -244,6 +245,10 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||
    case 'clean':r.stage=5;r.flash=false;it(r.id).rented++;toast(r.dmg?'Cleaned · deposit held for repair':'Cleaned · deposit refunded');break;
    case 'damage':r.dmg=true;S.oos[r.id]=true;r.stage=5;toast('Damage logged · item moved to repair, deposit held');break;
    case 'remind':toast(`Reminder sent to ${r.cust}`);break;
+   case 'sim':{const names=['Nurul H.','Jason L.','Kavitha S.','Daniel W.','Siti A.','Arjun M.','Chloe T.','Amir Z.','Hui Min C.','Farah N.'];
+    const pool=ITEMS.filter(i=>!S.oos[i.id]);const i=pool[Math.floor(Math.random()*pool.length)];const free=i.sizes.filter(z=>!(SOLD[i.id]||[]).includes(z));
+    const n={no:2042+S.rentals.length,id:i.id,size:free[Math.floor(Math.random()*free.length)],cust:names[Math.floor(Math.random()*names.length)],date:S.today,due:'Tue 8 Dec',stage:1,code:'RD-'+Math.floor(100+Math.random()*900),rack:'R'+(1+Math.floor(Math.random()*8)),paid:i.p+50,flash:true,mine:false};
+    S.rentals.push(n);S.stab='queue';toast(`New order from ${n.cust}: ${i.name}`);break}
    case 'oos':S.oos[d.id]=!S.oos[d.id];toast(S.oos[d.id]?'Moved to repair':'Back in the collection');break;
   }
   render();return}
