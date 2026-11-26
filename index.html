@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReDrobe Demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+/* VOICE: confident, friendly student fashion app; feels shipped, not a slide.
+   IDEA: a rental tag on a hanger: every outfit has a tag with its price, size and history.
+   PICTURE: the working app in a phone frame (full screen on phones); outfits drawn as simple garment silhouettes.
+   COLOUR and TYPE: blush ground, deep plum ink, rose accent, sage for "available"; DM Serif Display titles, DM Sans text.
+   LAYOUT: one-column app with bottom tabs; a short presenter note beside it on wide screens. */
+:root{color-scheme:light dark;
+--bg:light-dark(#EFE2DE,#140E14);--app:light-dark(#FAF5F2,#1E161E);--card:light-dark(#FFFFFF,#2A1F2A);
+--ink:light-dark(#2A1F2D,#F5EAF0);--soft:light-dark(#6E5E6B,#C9B5C2);--line:light-dark(#EBDDD8,#3E2F3D);
+--rose:light-dark(#B23A62,#E07A9C);--rosebg:light-dark(#F7E1E8,#3A1F2B);--onrose:light-dark(#FFFFFF,#1E161E);--sage:light-dark(#4F7A60,#8FC2A2)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'DM Sans',Arial,sans-serif;overflow-x:clip}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:3px solid var(--rose);outline-offset:2px}
+.stage{min-height:100vh;display:flex;gap:32px;align-items:center;justify-content:center;padding:32px 16px}
+.note{max-width:300px}
+.note h1{font:400 44px/1.05 'DM Serif Display',Georgia,serif;margin:0 0 12px}
+.note p{color:var(--soft);margin:0 0 12px}.note small{color:var(--soft)}
+.phone{width:390px;height:800px;border-radius:48px;background:var(--app);border:10px solid #1B1219;box-shadow:0 30px 60px #2A1F2D40;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.top{padding:22px 22px 8px;display:flex;align-items:center;justify-content:space-between}
+.brand{font:400 26px 'DM Serif Display',Georgia,serif}
+.chip{font-size:13px;font-weight:700;background:var(--rosebg);color:var(--rose);padding:6px 12px;border-radius:99px;white-space:nowrap}
+main{flex:1;overflow-y:auto;padding:4px 18px 18px}
+h2{font:400 30px/1.1 'DM Serif Display',Georgia,serif;margin:8px 0 12px}
+h3{font-size:16px;margin:0;line-height:1.3}
+.muted{color:var(--soft);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px}
+.hero{background:var(--rose);color:var(--onrose);border-radius:24px;padding:20px 120px 20px 20px;margin-bottom:14px;position:relative;overflow:hidden;min-height:150px}
+.hero b{font:400 30px/1.05 'DM Serif Display',serif;display:block;margin:4px 0 6px}
+.hero svg{position:absolute;right:14px;bottom:0}
+.btn{display:block;width:100%;min-height:52px;border-radius:16px;background:var(--rose);color:var(--onrose);font-weight:700;font-size:17px;margin-top:10px}
+.btn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:12px}.grow{flex:1}
+.price{font-weight:700;white-space:nowrap}
+.pills{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:0 -18px 10px;padding-inline:18px;scroll-snap-type:x mandatory}
+.pills button{flex:none;min-height:40px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:var(--card);font-weight:700;font-size:14px;scroll-snap-align:start}
+.pills button.on{background:var(--ink);color:var(--app);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:10px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.swatch{border-radius:14px;display:grid;place-items:center;aspect-ratio:1/1.05}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--rosebg);color:var(--rose)}
+.seg{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
+.seg button{min-height:44px;min-width:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:700;font-size:15px}
+.seg button.on{background:var(--rosebg);border-color:var(--rose);color:var(--rose)}
+.seg button[disabled]{opacity:.35;text-decoration:line-through;cursor:not-allowed}
+.opt{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);margin-bottom:8px;text-align:left}
+.opt.on{border:2px solid var(--rose);background:var(--rosebg)}
+.line{display:flex;justify-content:space-between;gap:12px;padding:4px 0}
+.total{font-weight:700;font-size:18px;border-top:1px solid var(--line);margin-top:6px;padding-top:10px}
+.steps{list-style:none;padding:0;margin:14px 0}
+.steps li{display:flex;gap:12px;align-items:flex-start;padding-bottom:14px}
+.dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:13px;font-weight:700;background:var(--card)}
+.steps li.done .dot{background:var(--sage);border-color:var(--sage);color:#fff}
+.steps li.now .dot{border-color:var(--rose);box-shadow:0 0 0 4px #B23A6230}
+.ticket{border:2px dashed var(--rose);border-radius:20px;padding:16px;text-align:center;margin:10px 0}
+.ticket b{font:400 48px/1 'DM Serif Display',serif;color:var(--rose);display:block}
+.tabs{display:flex;border-top:1px solid var(--line);background:var(--card)}
+.tabs button{flex:1;min-height:60px;font-size:13px;font-weight:700;color:var(--soft);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.tabs button.on{color:var(--rose)}.tabs i{font-style:normal;font-size:19px;line-height:1}
+.back{min-height:44px;font-weight:700;color:var(--rose);padding:0}
+.toast{position:absolute;left:18px;right:18px;bottom:76px;background:#2A1F2D;color:#FAF5F2;padding:12px 16px;border-radius:14px;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+.demo{font-size:12px;color:var(--soft);text-align:center;margin-top:8px}
+.log{font-size:13px;color:var(--soft);border-left:3px solid var(--line);padding-left:10px;margin:4px 0}
+.switch{display:none;position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 12px;gap:8px;justify-content:center}
+.switch button{min-height:44px;padding:0 18px;border-radius:99px;border:1px solid var(--line);background:var(--card);font-weight:700}
+.switch button.on{background:var(--ink);color:var(--app);border-color:var(--ink)}
+.staff{width:min(760px,100%);height:800px;background:var(--app);border:1px solid var(--line);border-radius:28px;box-shadow:0 30px 60px #2A1F2D26;display:flex;flex-direction:column;overflow:hidden}
+.shead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;background:var(--ink);color:var(--app)}
+.shead b{font:400 24px 'DM Serif Display',serif}
+.sbody{flex:1;overflow-y:auto;padding:16px 20px 20px}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+.stat b{display:block;font:400 30px/1 'DM Serif Display',serif;color:var(--rose)}
+.stat span{font-size:13px;color:var(--soft)}
+.stabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.stabs button{min-height:40px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:var(--card);font-weight:700;font-size:14px}
+.stabs button.on{background:var(--rose);color:var(--onrose);border-color:var(--rose)}
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.col{background:var(--rosebg);border-radius:16px;padding:10px;min-height:120px}
+.col h4{margin:2px 4px 8px;font-size:14px}
+.col h4 small{color:var(--soft);font-weight:500}
+.ord{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px;font-size:14px}
+.ord .who{font-weight:700}
+.ord .mini{color:var(--soft);font-size:13px}
+.ord .late{color:#B4232F;font-weight:700;font-size:13px}
+.ord .new{display:inline-block;font-size:11px;font-weight:700;background:var(--sage);color:#fff;border-radius:99px;padding:1px 7px;margin-left:4px}
+.sbtn{display:block;width:100%;min-height:40px;border-radius:10px;background:var(--rose);color:var(--onrose);font-weight:700;font-size:13px;margin-top:8px}
+.sbtn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.inv{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);border-radius:14px;overflow:hidden}
+.inv th,.inv td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}
+.inv td.n{text-align:right;white-space:nowrap}
+.pill2{font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;white-space:nowrap}
+.ok{background:#DDEEE3;color:#2F5A40}.off{background:#F6DADE;color:#8E1F2C}
+.empty{color:var(--soft);font-size:13px;padding:6px 4px}
+@media(max-width:1180px){.note{display:none}.switch{display:flex}.stage{flex-direction:column;justify-content:flex-start;padding:0 16px 24px;gap:0}
+ body[data-mode=client] .staff{display:none} body[data-mode=staff] .phone{display:none}}
+@media(max-width:860px){.stage{padding:0}.phone,.staff{width:100%;height:calc(100vh - 64px);height:calc(100dvh - 64px);border:0;border-radius:0;box-shadow:none}
+ .stats{grid-template-columns:repeat(3,minmax(0,1fr))}.board{grid-template-columns:repeat(2,minmax(0,1fr))}.inv .hide{display:none}}
+@media(max-width:480px){.board{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body data-mode="client">
+<div class="switch" id="switch" role="tablist" aria-label="Choose view"><button data-mode="client" class="on">Customer app</button><button data-mode="staff">Staff dashboard</button></div>
+<div class="stage">
+  <div class="note">
+    <h1>ReDrobe demo</h1>
+    <p>Browse by occasion, choose a size and pickup date, pay the rental fee and deposit, then follow the outfit from pickup to return and cleaning.</p>
+    <p>Left: the customer app. Right: the studio staff dashboard. Both share the same data, so a booking made on the phone appears in the staff queue straight away.</p>
+    <small>Prototype with sample outfits and prices. No real payment is taken.</small>
+  </div>
+  <div class="phone">
+    <div class="top"><span class="brand">ReDrobe</span><span class="chip" id="memchip">Guest</span></div>
+    <main id="view" aria-live="polite"></main>
+    <nav class="tabs" id="tabs">
+      <button data-tab="home" class="on"><i>⌂</i>Home</button>
+      <button data-tab="browse"><i>◇</i>Browse</button>
+      <button data-tab="rentals"><i>▢</i>My rentals</button>
+      <button data-tab="member"><i>★</i>Monthly</button>
+    </nav>
+    <div class="toast" id="toast" role="status"></div>
+  </div>
+  <section class="staff" id="staff" aria-label="Staff dashboard"></section>
+</div>
+<script>
+{
+const ITEMS=[
+ {id:'satin',name:'Satin Midi Dress',occ:'Dinner',p:45,retail:229,kind:'dress',c:'#9C3D54',sizes:['S','M','L'],rented:6},
+ {id:'gown',name:'Evening Gown',occ:'Gala',p:89,retail:520,kind:'gown',c:'#2E3A6E',sizes:['XS','S','M'],rented:4},
+ {id:'kurung',name:'Floral Baju Kurung',occ:'Wedding',p:49,retail:260,kind:'dress',c:'#C98A9E',sizes:['S','M','L','XL'],rented:9},
+ {id:'melayu',name:'Songket Baju Melayu',occ:'Wedding',p:69,retail:420,kind:'suit',c:'#1F5B4E',sizes:['M','L','XL'],rented:5},
+ {id:'suit',name:'Navy Interview Suit',occ:'Interview',p:79,retail:450,kind:'suit',c:'#24324F',sizes:['S','M','L','XL'],rented:7},
+ {id:'blazer',name:'Linen Blazer Set',occ:'Interview',p:55,retail:299,kind:'blazer',c:'#B9A68A',sizes:['XS','S','M','L'],rented:8},
+ {id:'grad',name:'Graduation Blazer Set',occ:'Graduation',p:79,retail:380,kind:'blazer',c:'#3B2F4A',sizes:['S','M','L','XL'],rented:3},
+ {id:'skirt',name:'Pleated Skirt Set',occ:'Casual',p:29,retail:149,kind:'skirt',c:'#D9B44A',sizes:['XS','S','M'],rented:11},
+ {id:'denim',name:'Denim Jacket Look',occ:'Photoshoot',p:25,retail:139,kind:'blazer',c:'#5C7FA8',sizes:['S','M','L'],rented:10}];
+const ACC=[{id:'clutch',name:'Beaded clutch',p:15},{id:'pearl',name:'Pearl earrings',p:10},{id:'tie',name:'Silk tie',p:10}];
+const OCC=['All','Dinner','Wedding','Interview','Graduation','Gala','Casual','Photoshoot'];
+const DATES=['Thu 3 Dec','Fri 4 Dec','Mon 7 Dec','Tue 8 Dec','Wed 9 Dec'];
+const SOLD={satin:['M'],suit:['L'],gown:['S']};
+const S={tab:'home',screen:'home',occ:'All',pick:null,size:null,date:null,days:4,acc:[],pay:null,member:false,rentals:[],quiz:null,stab:'queue',oos:{},today:'Fri 4 Dec',flash:null};
+S.rentals.push(
+ {no:2041,id:'kurung',size:'M',cust:'Aina R.',date:'Fri 4 Dec',due:'Tue 8 Dec',stage:1,code:'RD-311',rack:'R3',paid:99,mine:false},
+ {no:2040,id:'denim',size:'L',cust:'Priya K.',date:'Fri 4 Dec',due:'Tue 8 Dec',stage:2,code:'RD-288',rack:'R2',paid:75,mine:false},
+ {no:2038,id:'suit',size:'M',cust:'Hafiz A.',date:'Fri 27 Nov',due:'Wed 2 Dec',stage:3,code:'RD-207',rack:'R1',paid:129,late:2,mine:false},
+ {no:2035,id:'gown',size:'XS',cust:'Mei Ling T.',date:'Sat 28 Nov',due:'Thu 3 Dec',stage:4,code:'RD-150',rack:'R5',paid:139,mine:false});
+const $=id=>document.getElementById(id);const rm=n=>'RM'+n.toFixed(2);const it=id=>ITEMS.find(i=>i.id===id);
+
+function garment(kind,c,w){const s=w||90;const shapes={
+ dress:`<path d="M38 18h24l-4 16 14 50H28l14-50z" fill="${c}"/><path d="M42 18q8 8 16 0" fill="none" stroke="#0003" stroke-width="2"/>`,
+ gown:`<path d="M40 16h20l-3 18 22 56H21l22-56z" fill="${c}"/><path d="M50 34v54" stroke="#fff3" stroke-width="2"/>`,
+ suit:`<path d="M30 20l12-6 8 10 8-10 12 6 6 64H24z" fill="${c}"/><path d="M50 24v58M42 14l8 22 8-22" fill="none" stroke="#fff5" stroke-width="2"/><circle cx="50" cy="52" r="2" fill="#fff8"/><circle cx="50" cy="62" r="2" fill="#fff8"/>`,
+ blazer:`<path d="M28 22l14-8 8 12 8-12 14 8 4 50H24z" fill="${c}"/><path d="M42 14l8 30 8-30" fill="none" stroke="#fff6" stroke-width="2"/>`,
+ skirt:`<path d="M36 18h28v18H36z" fill="${c}"/><path d="M34 40h32l10 44H24z" fill="${c}" opacity=".85"/><path d="M40 40l-4 44M50 40v44M60 40l4 44" stroke="#0002" stroke-width="2"/>`};
+ return `<svg width="${s}" height="${s}" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 6v6M40 14q10-10 20 0" fill="none" stroke="#8A7A86" stroke-width="2.5" stroke-linecap="round"/>${shapes[kind]}</svg>`}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2200)}
+function cost(){const i=it(S.pick);const rent=S.member?0:i.p+(S.days===7?15:0);const acc=S.acc.reduce((a,id)=>a+ACC.find(x=>x.id===id).p,0);const dep=S.member?0:50;return{rent,acc,dep,total:rent+acc+dep}}
+function mine(){return S.rentals.filter(r=>r.mine)}
+
+const V={
+home(){const r=mine().find(x=>x.stage<5);
+ return `<div class="hero"><span>Wear more. Buy less.</span><b>Dinner this Friday?</b><span>Rent a look from RM25 for 4 days.</span>${garment('dress','#FAF5F2',110)}</div>
+ ${r?`<button class="card row" data-go="track" data-id="${r.no}" style="width:100%;text-align:left"><span class="swatch" style="background:var(--rosebg);width:56px;aspect-ratio:1">${garment(it(r.id).kind,it(r.id).c,48)}</span><span class="grow"><h3>${it(r.id).name}</h3><span class="muted">${['Booked','Ready to collect','Wearing','Returned','Cleaned'][r.stage-1]} · ${r.date}</span></span><span class="price">›</span></button>`:''}
+ <p class="muted" style="font-weight:700;margin:14px 2px 8px">Shop by occasion</p>
+ <div class="grid">${['Dinner','Wedding','Interview','Graduation'].map(o=>`<button class="tile" data-occ="${o}"><span style="font-weight:700">${o}</span><span class="muted">${ITEMS.filter(i=>i.occ===o).length} looks</span></button>`).join('')}</div>
+ <button class="btn alt" data-tab="member" style="margin-top:14px">ReDrobe Monthly · 2 outfits for RM69</button>`},
+browse(){const list=ITEMS.filter(i=>(S.occ==='All'||i.occ===S.occ)&&!S.oos[i.id]);
+ return `<h2>Browse</h2><div class="pills" role="tablist">${OCC.map(o=>`<button class="${S.occ===o?'on':''}" data-occ="${o}">${o}</button>`).join('')}</div>
+ <div class="grid">${list.map(i=>`<button class="tile" data-pick="${i.id}"><span class="swatch" style="background:var(--rosebg)">${garment(i.kind,i.c)}</span><span class="tag">${i.occ}</span><h3>${i.name}</h3><span class="row" style="gap:6px"><span class="price">${rm(i.p)}</span><span class="muted" style="text-decoration:line-through">RM${i.retail}</span></span></button>`).join('')}</div>`},
+item(){const i=it(S.pick);const sold=SOLD[i.id]||[];const c=cost();
+ return `<button class="back" data-tab="browse">‹ Browse</button>
+ <div class="swatch" style="background:var(--rosebg);aspect-ratio:16/10;margin:4px 0 12px">${garment(i.kind,i.c,150)}</div>
+ <span class="tag">${i.occ}</span><h2 style="margin-top:6px">${i.name}</h2>
+ <p class="muted" style="margin-top:-6px">Retail RM${i.retail} · rent for ${Math.round(i.p/i.retail*100)}% of the price · rented ${i.rented} times</p>
+ <div class="card"><h3>Size</h3><div class="seg">${['XS','S','M','L','XL'].map(s=>{const no=!i.sizes.includes(s)||sold.includes(s);return `<button class="${S.size===s?'on':''}" data-size="${s}" ${no?'disabled':''} aria-label="Size ${s}${no?' unavailable':''}">${s}</button>`}).join('')}</div>
+ <h3 style="margin-top:12px">Pickup date</h3><div class="seg">${DATES.map(d=>`<button class="${S.date===d?'on':''}" data-date="${d}">${d}</button>`).join('')}</div>
+ <h3 style="margin-top:12px">Rental length</h3><div class="seg"><button class="${S.days===4?'on':''}" data-days="4">4 days</button><button class="${S.days===7?'on':''}" data-days="7">7 days +RM15</button></div></div>
+ <div class="card"><h3>Add accessories</h3>${ACC.map(a=>`<button class="opt ${S.acc.includes(a.id)?'on':''}" data-acc="${a.id}" style="margin-top:8px"><span class="grow">${a.name}</span><span class="price">+${rm(a.p)}</span></button>`).join('')}</div>
+ <button class="btn" data-go="checkout" ${S.size&&S.date?'':'disabled'}>${S.size&&S.date?`Rent for ${rm(c.rent+c.acc)}${S.member?' (member)':''}`:'Choose a size and date'}</button>`},
+checkout(){const i=it(S.pick),c=cost();
+ return `<button class="back" data-go="item">‹ Outfit</button><h2>Checkout</h2>
+ <div class="card row"><span class="swatch" style="background:var(--rosebg);width:64px;aspect-ratio:1">${garment(i.kind,i.c,54)}</span><span class="grow"><h3>${i.name}</h3><span class="muted">Size ${S.size} · pickup ${S.date} · ${S.days} days</span></span></div>
+ <div class="card"><div class="line"><span>Rental</span><span class="price">${S.member?'Included':rm(c.rent)}</span></div>
+ ${c.acc?`<div class="line"><span>Accessories</span><span class="price">${rm(c.acc)}</span></div>`:''}
+ <div class="line"><span>Refundable deposit</span><span class="price">${S.member?'Waived':rm(c.dep)}</span></div>
+ <div class="line total"><span>Pay now</span><span>${rm(c.total)}</span></div></div>
+ <p class="muted" style="font-weight:700;margin:12px 2px 6px">Pay with</p>
+ ${['DuitNow QR','Touch ’n Go eWallet','Debit or credit card'].map(p=>`<button class="opt ${S.pay===p?'on':''}" data-pay="${p}"><span class="grow">${p}</span>${S.pay===p?'<span class="price">✓</span>':''}</button>`).join('')}
+ <button class="btn" data-act="book" ${S.pay||c.total===0?'':'disabled'}>${c.total?`Pay ${rm(c.total)}`:'Confirm booking'}</button>
+ <p class="demo">Demo only: no money is charged. Late returns cost RM10 a day.</p>`},
+rentals(){if(!mine().length)return `<h2>My rentals</h2><div class="card muted">No rentals yet. Find a look for your next event.</div><button class="btn" data-tab="browse">Browse outfits</button>`;
+ return `<h2>My rentals</h2>${mine().slice().reverse().map(r=>{const i=it(r.id);return `<button class="card row" data-go="track" data-id="${r.no}" style="width:100%;text-align:left"><span class="swatch" style="background:var(--rosebg);width:56px;aspect-ratio:1">${garment(i.kind,i.c,48)}</span><span class="grow"><h3>${i.name}</h3><span class="muted">#${r.no} · ${['Booked','Ready to collect','Wearing','Returned','Cleaned'][r.stage-1]}</span></span><span class="price">›</span></button>`}).join('')}`},
+track(){const r=S.rentals.find(x=>x.no===S.cur);if(!r)return V.rentals();const i=it(r.id);
+ const st=[`Booked for ${r.date}`,`Ready to collect at the campus studio, rack ${r.rack}`,`Wearing · return by ${r.due}`,'Returned to the drop box','Professionally cleaned and back in the collection'];
+ return `<button class="back" data-tab="rentals">‹ My rentals</button><h2>${i.name}</h2>
+ <div class="ticket"><span class="muted">${r.stage<=2?'Pickup code':'Return code'}</span><b>${r.code}</b><span class="muted">Show at the studio counter</span></div>
+ <ol class="steps">${st.map((s,k)=>`<li class="${r.stage>k+1||r.stage===5?'done':r.stage===k+1?'now':''}"><span class="dot">${r.stage>k+1||r.stage===5?'✓':k+1}</span><span>${s}</span></li>`).join('')}</ol>
+ ${r.stage===3?`<button class="btn" data-act="next">Return outfit to the drop box</button>`:`<p class="card muted" style="margin:0">${['The studio is preparing your outfit. You will be notified when it is ready.','Show this code at the studio counter to collect.','','The studio is checking and cleaning it. Your deposit is refunded after the check.',r.dmg?'Damage was found, so the deposit is held for repair.':'All done. Deposit refunded.'][r.stage-1]}</p>`}
+ <p class="demo">Staff steps happen in the staff dashboard.</p>
+ <div class="card" style="margin-top:12px"><h3>QR tag history</h3><p class="log">Rented ${i.rented+(r.stage>=3?1:0)} times · last cleaned 28 Nov · no damage reported</p>${r.stage===5?'<p class="log">Cleaned and checked today · deposit refunded</p>':''}</div>`},
+member(){return `<h2>ReDrobe Monthly</h2>
+ <div class="hero" style="padding-right:20px;min-height:0"><b>RM69 / month</b><span>2 outfits at a time · swap anytime · free styling · no deposit</span></div>
+ <div class="card"><h3>What you save</h3><p class="muted" style="margin:4px 0 0">Two dinner dresses a month rented one by one cost about RM90 plus deposits. Members pay RM69 and swap as often as they like.</p></div>
+ <div class="card"><h3>Your outfit slots</h3><div class="row" style="margin-top:10px">${[0,1].map(k=>{const r=mine().filter(x=>x.member&&x.stage<4)[k];return `<span class="swatch grow" style="background:var(--rosebg);aspect-ratio:1">${r?garment(it(r.id).kind,it(r.id).c,70):'<span class="muted">Empty</span>'}</span>`}).join('')}</div></div>
+ <button class="btn ${S.member?'alt':''}" data-act="member">${S.member?'Cancel membership (demo)':'Join for RM69 a month'}</button>
+ <p class="demo">Demo only: no subscription is started.</p>`}
+};
+const STAGES=['To prepare','Ready to collect','Out on rental','Returned: inspect'];
+function ordCard(r){const i=it(r.id);const btn={1:['ready','Prepared on rack '+r.rack],2:['hand','Handed over'],3:['walkin','Check in return'],4:['clean','Inspected and cleaned']}[r.stage];
+ return `<div class="ord"><div class="who">${r.cust}${r.flash?'<span class="new">new</span>':''}</div><div>${i.name} · ${r.size||'M'}</div><div class="mini">#${r.no} · ${r.code} · ${r.stage<=2?'pickup '+r.date:'due '+r.due}</div>${r.late?`<div class="late">${r.late} days late · RM${r.late*10} fee</div>`:''}
+ ${btn?`<button class="sbtn" data-sact="${btn[0]}" data-no="${r.no}">${btn[1]}</button>`:''}${r.stage===3&&r.late?`<button class="sbtn alt" data-sact="remind" data-no="${r.no}">Send reminder</button>`:''}${r.stage===4?`<button class="sbtn alt" data-sact="damage" data-no="${r.no}">Report damage</button>`:''}</div>`}
+function renderStaff(){const R=S.rentals;const cnt=k=>R.filter(r=>r.stage===k).length;
+ const today=R.filter(r=>r.date===S.today);const rev=R.filter(r=>r.mine||r.date===S.today).reduce((a,r)=>a+(r.paid||0),0);
+ const out=ITEMS.map(i=>({i,out:R.filter(r=>r.id===i.id&&r.stage>=2&&r.stage<=3).length,cleaning:R.filter(r=>r.id===i.id&&r.stage===4).length}));
+ $('staff').innerHTML=`<div class="shead"><b>ReDrobe Studio · Staff</b><span class="chip" style="background:#ffffff22;color:#fff">Today: ${S.today}</span></div><div class="sbody">
+ <div class="stats"><div class="stat"><b>${cnt(1)}</b><span>to prepare</span></div><div class="stat"><b>${cnt(2)}</b><span>ready to collect</span></div><div class="stat"><b>${cnt(3)}</b><span>out on rental</span></div><div class="stat"><b>${cnt(4)}</b><span>to inspect</span></div><div class="stat"><b>${R.filter(r=>r.late&&r.stage===3).length}</b><span>overdue</span></div></div>
+ <div class="stabs" role="tablist">${[['queue','Order queue'],['inv','Inventory'],['sum','Today']].map(([k,l])=>`<button class="${S.stab===k?'on':''}" data-stab="${k}">${l}</button>`).join('')}</div>
+ ${S.stab==='queue'?`<div class="board">${STAGES.map((t,k)=>{const list=R.filter(r=>r.stage===k+1);return `<div class="col"><h4>${t} <small>${list.length}</small></h4>${list.map(ordCard).join('')||'<div class="empty">Nothing here</div>'}</div>`}).join('')}</div>`:''}
+ ${S.stab==='inv'?`<table class="inv"><thead><tr><th>Item</th><th class="hide">Sizes</th><th class="n">Out</th><th class="n">Cleaning</th><th class="n hide">Rented</th><th>Status</th></tr></thead><tbody>${out.map(({i,out,cleaning})=>`<tr><td>${i.name}</td><td class="hide">${i.sizes.join(' ')}</td><td class="n">${out}</td><td class="n">${cleaning}</td><td class="n hide">${i.rented}×</td><td><button class="pill2 ${S.oos[i.id]?'off':'ok'}" data-sact="oos" data-id="${i.id}" aria-label="Toggle ${i.name} availability">${S.oos[i.id]?'In repair':'Available'}</button></td></tr>`).join('')}</tbody></table><p class="demo" style="text-align:left">Tap a status to move an item in or out of repair. Items in repair are hidden from customers.</p>`:''}
+ ${S.stab==='sum'?`<div class="grid"><div class="card"><span class="muted">Pickups booked for today</span><h2 style="margin:4px 0 0">${today.length}</h2></div><div class="card"><span class="muted">Payments today (incl. deposits)</span><h2 style="margin:4px 0 0">${rm(rev)}</h2></div><div class="card"><span class="muted">Late fees to collect</span><h2 style="margin:4px 0 0">${rm(R.filter(r=>r.late).reduce((a,r)=>a+r.late*10,0))}</h2></div><div class="card"><span class="muted">Items in repair</span><h2 style="margin:4px 0 0">${Object.values(S.oos).filter(Boolean).length}</h2></div></div><p class="demo" style="text-align:left">Sample data for the demo.</p>`:''}
+ </div>`}
+function render(){renderStaff();$('view').innerHTML=V[S.screen]();$('view').scrollTop=0;$('memchip').textContent=S.member?'Monthly member':'Guest';
+ for(const b of $('tabs').children)b.classList.toggle('on',b.dataset.tab===S.tab)}
+function go(screen,tab){S.screen=screen;if(tab)S.tab=tab;render()}
+
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const d=b.dataset;
+ if(d.mode){document.body.dataset.mode=d.mode;for(const x of $('switch').children)x.classList.toggle('on',x.dataset.mode===d.mode);return}
+ if(d.stab){S.stab=d.stab;renderStaff();return}
+ if(d.sact){const r=S.rentals.find(x=>x.no===+d.no);
+  switch(d.sact){
+   case 'ready':r.stage=2;r.flash=false;toast(`${r.cust}: outfit ready on rack ${r.rack}`);break;
+   case 'hand':r.stage=3;toast(`Handed over to ${r.cust}`);break;
+   case 'walkin':r.stage=4;r.flash=false;toast(r.late?`Returned · RM${r.late*10} late fee charged`:'Return checked in');break;
+   case 'clean':r.stage=5;r.flash=false;it(r.id).rented++;toast(r.dmg?'Cleaned · deposit held for repair':'Cleaned · deposit refunded');break;
+   case 'damage':r.dmg=true;S.oos[r.id]=true;r.stage=5;toast('Damage logged · item moved to repair, deposit held');break;
+   case 'remind':toast(`Reminder sent to ${r.cust}`);break;
+   case 'oos':S.oos[d.id]=!S.oos[d.id];toast(S.oos[d.id]?'Moved to repair':'Back in the collection');break;
+  }
+  render();return}
+ if(d.tab){go(d.tab,d.tab);return}
+ if(d.occ){S.occ=d.occ;go('browse','browse');return}
+ if(d.pick){S.pick=d.pick;S.size=null;S.date=null;S.days=4;S.acc=[];S.pay=null;go('item','browse');return}
+ if(d.size){S.size=d.size;render();return}
+ if(d.date){S.date=d.date;render();return}
+ if(d.days){S.days=+d.days;render();return}
+ if(d.acc){S.acc=S.acc.includes(d.acc)?S.acc.filter(x=>x!==d.acc):[...S.acc,d.acc];render();return}
+ if(d.pay){S.pay=d.pay;render();return}
+ if(d.go==='track'){S.cur=+d.id;go('track','rentals');return}
+ if(d.go){if(d.go==='checkout'&&S.member&&mine().filter(x=>x.member&&x.stage<4).length>=2){toast('Both member slots are in use. Return one first.');return}go(d.go);return}
+ switch(d.act){
+  case 'book':{const r={mine:true,cust:'You (demo customer)',size:S.size,paid:cost().total,flash:true,no:1000+Math.floor(Math.random()*9000),id:S.pick,date:S.date,due:(()=>{const dd=new Date(2026,11,+S.date.split(' ')[1]+S.days);return dd.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})})(),rack:'R'+(1+Math.floor(Math.random()*8)),code:'RD-'+Math.floor(100+Math.random()*900),stage:1,member:S.member};
+   S.rentals.push(r);S.cur=r.no;toast('Booked! See you at the studio.');go('track','rentals');break}
+  case 'next':{const r=S.rentals.find(x=>x.no===S.cur);if(r&&r.stage===3){r.stage=4;r.flash=true;toast('Thanks for returning it')}render();break}
+  case 'member':S.member=!S.member;toast(S.member?'Welcome to ReDrobe Monthly':'Membership cancelled');render();break;
+ }});
+render();
+}
+</script>
+</body>
+</html>
